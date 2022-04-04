@@ -56,6 +56,7 @@ void SerialOutputString(char *pt, SerialPort *serial_port) {
 
   //SerialOutputString(&string_buffer[0], &SCI1); 
 
-}   */
+}   */ 
+//__interrupt void SCI0_ISR(){} 
 
 

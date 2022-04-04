@@ -17,7 +17,7 @@ void main(void) {
    
   //SerialOutputString(&string_buffer[0], &SCI0);
   //SerialOutputString(&string_buffer[0], &SCI1); 
-  
+  //fgets(string,1000,SCI0);  
 
   EnableInterrupts;
   for(;;) {
