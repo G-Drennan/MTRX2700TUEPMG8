@@ -2,10 +2,10 @@
 #include "derivative.h"      /* derivative-specific definitions */
 #include <stdio.h> 
 #include "serial.h" 
-//Look I updated it
+
 
 void main(void) { 
-     //EnableInterrupts;
+     
   /* put your own code here */
 
   char string_buffer[64];
@@ -19,7 +19,7 @@ void main(void) {
   //SerialOutputString(&string_buffer[0], &SCI1); 
   
 
-
+  EnableInterrupts;
   for(;;) {
     _FEED_COP(); /* feeds the dog */
   } /* loop forever */
@@ -30,4 +30,4 @@ void main(void) {
 
   SerialOutputString(&string_buffer[0], &SCI1); 
   
-} */     
+}*/    
