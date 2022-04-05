@@ -40,7 +40,7 @@ void OutputChar(char data, SerialPort *serial_port) {
 
 interrupt 21 void GetOut(){ //data register has been transimited
   char d = 'd'; 
-
+ 
   OutputChar(d,&SCI1);             
   //SerialOutputString(&string_buffer[0], &SCI1);   
 }      
@@ -60,4 +60,4 @@ while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
  //GetOut();
  while(1){}  
 
-}     
+}    
