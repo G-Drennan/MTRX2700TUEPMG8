@@ -2,7 +2,7 @@
 #include "derivative.h"      /* derivative-specific definitions */
 #include <stdio.h> 
 #include "serial.h" 
- //SCI1 = 0b1100100  ;
+ //SCI1 = 0b1100100; 
 //struct string_Buufer  
 void OutputChar(char data, SerialPort *serial_port) {  
   *(serial_port->DataRegister) = data;
@@ -19,7 +19,7 @@ interrupt 21 void GetOut(){ //data register has been transimited
 
 void main(void){  
  char s = 'S';
- DisableInterrupts;  
+ //DisableInterrupts;   
  //SerialInitialise(BAUD_9600, &SCI0);
  SerialInitialise(BAUD_9600, &SCI1);
  
@@ -30,9 +30,10 @@ while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
 
  // sprintf(&string_buffer[0],"HELLO WORLD!"); 
 
- EnableInterrupts;       
+ //EnableInterrupts;       
  //GetOut();
  while(1){}  
 
 }   
+  
    

@@ -1,37 +1,40 @@
-#include <hidef.h>      /* common defines and macros */
-#include "derivative.h"      /* derivative-specific definitions */
-#include <stdio.h> 
-#include "serial.h" 
- //SCI1 = 0b1100100  ;
-//struct string_Buufer  
-void OutputChar(char data, SerialPort *serial_port) {  
-  *(serial_port->DataRegister) = data;
-}
-
-interrupt 21 void GetOut(){ //data register has been transimited
-  char d = 'd'; 
-
-  OutputChar(d,&SCI1);             
-  //SerialOutputString(&string_buffer[0], &SCI1);   
-}      
-
-//interrupt 21 void GetIn(); 
-
-void main(void){  
- char s = 'S';
- DisableInterrupts;  
- //SerialInitialise(BAUD_9600, &SCI0);
- SerialInitialise(BAUD_9600, &SCI1);
+#include <mc9s12dp256.h>        /* derivative information */
+#include "serial.h"
  
-while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
-  } 
- OutputChar(s,&SCI1);    
- //char string_buffer[64];
+// instantiate the serial port parameters
+//   note: the complexity is hidden in the c file
+SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
+SerialPort SCI0 = {&SCI0BDH, &SCI0BDL, &SCI0CR1, &SCI0CR2, &SCI0DRL, &SCI0SR1};
 
- // sprintf(&string_buffer[0],"HELLO WORLD!"); 
-
- EnableInterrupts;       
- //GetOut();
- while(1){}  
-
+// InitialiseSerial - Initialise the serial port SCI1
+// Input: baudRate is tha baud rate in bits/sec
+void SerialInitialise(int baudRate, SerialPort *serial_port) {
+  
+  // Baud rate calculation from datasheet
+  switch(baudRate){
+	case BAUD_9600:
+      *(serial_port->BaudHigh)=0;
+      *(serial_port->BaudLow)=156;
+	  break;
+	case BAUD_19200:
+      *(serial_port->BaudHigh)=0;
+      *(serial_port->BaudLow)=78;
+	  break;
+	case BAUD_38400:
+      *(serial_port->BaudHigh)=0;
+      *(serial_port->BaudLow)=39;
+	  break;
+	case BAUD_57600:
+      *(serial_port->BaudHigh)=0;
+      *(serial_port->BaudLow)=26;
+	  break;
+	case BAUD_115200:
+      *(serial_port->BaudHigh)=0;
+      *(serial_port->BaudLow)=13;
+	  break;
+  }
+     //#define SCI1CR2_TCIE_MASK               64U
+    //#define SCI1CR2_SCTIE_MASK              
+  *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|(SCI1CR2_TE_MASK|(SCI1CR2_TCIE_MASK|SCI1CR2_SCTIE_MASK)); 
+  *(serial_port->ControlRegister1) = 0x00;
 }  
