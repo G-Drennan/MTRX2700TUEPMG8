@@ -2,7 +2,7 @@
 
 Minghand P2
 
-Logan p2
+Lachlan p2
 
 Giaan P1
 
