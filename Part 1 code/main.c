@@ -2,32 +2,37 @@
 #include "derivative.h"      /* derivative-specific definitions */
 #include <stdio.h> 
 #include "serial.h" 
+ //SCI1 = 0b1100100  ;
+//struct string_Buufer  
+void OutputChar(char data, SerialPort *serial_port) {  
+  *(serial_port->DataRegister) = data;
+}
 
+interrupt 21 void GetOut(){ //data register has been transimited
+  char d = 'd'; 
 
-void main(void) { 
-     
-  /* put your own code here */
+  OutputChar(d,&SCI1);             
+  //SerialOutputString(&string_buffer[0], &SCI1);   
+}      
 
-  char string_buffer[64];
-  char string[] = "0ABC"; 
-  sprintf(&string_buffer[0],"HELLO WORLD!"); 
-  
-  SerialInitialise(BAUD_9600, &SCI0);
-  SerialInitialise(BAUD_9600, &SCI1);    
+//interrupt 21 void GetIn(); 
+
+void main(void){  
+ char s = 'S';
+ DisableInterrupts;  
+ //SerialInitialise(BAUD_9600, &SCI0);
+ SerialInitialise(BAUD_9600, &SCI1);
+ 
+while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
+  } 
+ OutputChar(s,&SCI1);    
+ //char string_buffer[64];
+
+ // sprintf(&string_buffer[0],"HELLO WORLD!"); 
+
+ EnableInterrupts;       
+ //GetOut();
+ while(1){}  
+
+}   
    
-  //SerialOutputString(&string_buffer[0], &SCI0);
-  //SerialOutputString(&string_buffer[0], &SCI1); 
-  //fgets(string,1000,SCI0);  
-
-  EnableInterrupts;
-  for(;;) {
-    _FEED_COP(); /* feeds the dog */
-  } /* loop forever */
-  /* please make sure that you never leave main */
-} 
-
-/*interrupt 21 void GetOut(){ //Is this correctly on SCI1?
-
-  SerialOutputString(&string_buffer[0], &SCI1); 
-  
-}*/    

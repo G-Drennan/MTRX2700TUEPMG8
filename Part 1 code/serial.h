@@ -5,7 +5,7 @@
 // NOTE: these are stored as pointers because they 
 //       are const values so we can't store them directly
 //       in the struct
-typedef struct SerialPort {
+typedef struct SerialPort { 
   byte *BaudHigh;
   byte *BaudLow;
   byte *ControlRegister1;
@@ -43,4 +43,4 @@ void SerialOutputString(char *pt, SerialPort *serial_port);
 //__interrupt void SCI1_ISR(); 
 //__interrupt void SCI0_ISR(); 
 
-#endif 
+#endif  
