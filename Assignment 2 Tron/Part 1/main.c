@@ -13,12 +13,13 @@ typedef struct SerialPort {
   byte *DataRegister;
   byte *StatusRegister;
 } SerialPort; 
-
+//output var
 char *string = "Interrupts Activate!!!\r\n";
 char *current_character = 0x00;
 
+//intput var
 char inputArray[64];
-char currentChar = ' '; 
+char currentChar = ' ';   
 int arrCounter = 0x00;  
  
 // instantiate the serial port parameters
@@ -32,7 +33,7 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   *(serial_port->BaudHigh)=0;
   *(serial_port->BaudLow)=156;
   //input set up *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_RIE_MASK;    
-  //output set up 
+  //output set up
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
 }   
@@ -49,12 +50,13 @@ void SerialOutputChar(char data, SerialPort *serial_port) {
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
-
+  //output
   if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *current_character != 0x00) {
     SerialOutputChar(*(current_character++), &SCI1);
   }
+  //input
   /*else if (!(*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK)){ 
-       SerialInputChar(&SCI1);
+       //SerialInputChar(&SCI1); 
        currentChar = inputArray[arrCounter];
        arrCounter++; 
   }*/ 
@@ -71,7 +73,7 @@ void main(void){
  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
-                                                
+  //output                                              
     current_character = &string[0];
     
     // enable the transmit mask 
@@ -85,4 +87,4 @@ void main(void){
     }
   while(1){}    
 
-}    
+} 
