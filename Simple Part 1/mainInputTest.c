@@ -4,7 +4,7 @@
 
 // NOTE: these are stored as pointers because they 
 //       are const values so we can't store them directly
-//       in the struct 
+//       in the struct
 typedef struct SerialPort { 
   byte *BaudHigh;
   byte *BaudLow;
@@ -13,9 +13,6 @@ typedef struct SerialPort {
   byte *DataRegister;
   byte *StatusRegister;
 } SerialPort; 
-//output var
-char *string = "Interrupts Activate!!!\r\n";
-char *current_character = 0x00;
 
 //intput var
 char inputArray[64];
@@ -37,34 +34,14 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
 }   
-//struct string_Buufer  
-void SerialOutputChar(char data, SerialPort *serial_port) {  
-  
-  int wait_counter = 0;
-  while((*(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
-     if (wait_counter < 0xFE)
-       wait_counter++;
-  }
-  
-  *(serial_port->DataRegister) = data; 
-}
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
-  //output
-  if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *current_character != 0x00) {
-    SerialOutputChar(*(current_character++), &SCI1);
-  }
-  //input
-  /*else if (!(*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK)){ 
+  //input 
+  if (!(*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK)){ 
        //SerialInputChar(&SCI1); 
        currentChar = inputArray[arrCounter];
-       arrCounter++; 
-  }*/ 
-  else if (*current_character == 0x00){
-    
-    // string is finished, stop the transmit interrupt from firing
-    *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
-  }
+       arrCounter++;  
+  } 
 }         
 
 //interrupt 21 void GetIn();  
@@ -73,18 +50,19 @@ void main(void){
  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
-  //output                                              
-    current_character = &string[0];
-    
-    // enable the transmit mask 
-    *(SCI1.ControlRegister2) |= SCI1CR2_TCIE_MASK;
-    
-    // interrupts are enabled, only send the first char then the interrupts will send the rest one at a time
-    SerialOutputChar(*(current_character++), &SCI1);
-    
-    while (*current_character != 0x00) {
-      // waiting in here until the string has completed sending
-    }
+  
   while(1){}    
 
-}  
+}       
+
+/*
+#define SCI1CR2_SBK_MASK                1U //0
+#define SCI1CR2_RWU_MASK                2U
+#define SCI1CR2_RE_MASK                 4U
+#define SCI1CR2_TE_MASK                 8U
+#define SCI1CR2_ILIE_MASK               16U
+#define SCI1CR2_RIE_MASK                32U
+#define SCI1CR2_TCIE_MASK               64U
+#define SCI1CR2_SCTIE_MASK              128U //7
+*/         
+  
