@@ -16,6 +16,10 @@ typedef struct SerialPort {
 
 char *string = "Interrupts Activate!!!\r\n";
 char *current_character = 0x00;
+
+char inputArray[64];
+char currentChar = ' '; 
+int arrCounter = 0x00;  
  
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
@@ -26,7 +30,9 @@ SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
 void SerialInitialiseBasic(SerialPort *serial_port) {
   
   *(serial_port->BaudHigh)=0;
-  *(serial_port->BaudLow)=156;  
+  *(serial_port->BaudLow)=156;
+  //input set up *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_RIE_MASK;    
+  //output set up 
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
 }   
@@ -46,7 +52,12 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
 
   if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *current_character != 0x00) {
     SerialOutputChar(*(current_character++), &SCI1);
-  } 
+  }
+  /*else if (!(*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK)){ 
+       SerialInputChar(&SCI1);
+       currentChar = inputArray[arrCounter];
+       arrCounter++; 
+  }*/ 
   else if (*current_character == 0x00){
     
     // string is finished, stop the transmit interrupt from firing
