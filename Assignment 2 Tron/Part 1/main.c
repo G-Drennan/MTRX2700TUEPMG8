@@ -13,6 +13,7 @@ typedef struct SerialPort {
   byte *DataRegister;
   byte *StatusRegister;
 } SerialPort; 
+
 //output var
 char *string = "Interrupts Activate!!!\r\n";
 char *current_character = 0x00;
@@ -29,11 +30,10 @@ SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
 // InitialiseSerial - Initialise the serial port SCI1
 // Input: baudRate is tha baud rate in bits/sec
 void SerialInitialiseBasic(SerialPort *serial_port) {
-  
+  //baud rate is BAUD_9600
   *(serial_port->BaudHigh)=0;
-  *(serial_port->BaudLow)=156;
-  //input set up *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_RIE_MASK;    
-  //output set up
+  *(serial_port->BaudLow)=156;   
+  
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK|SCI1CR2_RIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
 }   
@@ -75,7 +75,8 @@ void main(void){
  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
-  //output                                              
+  
+  //output  start                                            
   current_character = &string[0];
     
     // enable the transmit mask 
