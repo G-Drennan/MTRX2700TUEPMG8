@@ -20,26 +20,28 @@ char *current_character = 0x00;
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
 SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
- 
+
+
 // InitialiseSerial - Initialise the serial port SCI1
 // Input: baudRate is tha baud rate in bits/sec
 void SerialInitialiseBasic(SerialPort *serial_port) {
   
   *(serial_port->BaudHigh)=0;
-  *(serial_port->BaudLow)=156;  
-  *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK;     
+  *(serial_port->BaudLow)=156; 
+  *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK; 
   *(serial_port->ControlRegister1) = 0x00;
 }   
-//struct string_Buufer  
+
+        
 void SerialOutputChar(char data, SerialPort *serial_port) {  
-  
+
   int wait_counter = 0;
   while((*(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
      if (wait_counter < 0xFE)
        wait_counter++;
   }
   
-  *(serial_port->DataRegister) = data; 
+  *(serial_port->DataRegister) = data;
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
@@ -52,12 +54,11 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
     // string is finished, stop the transmit interrupt from firing
     *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
   }
-}         
-
-//interrupt 21 void GetIn();  
+}      
 
 void main(void){  
- SerialInitialiseBasic(&SCI1);  
+  
+  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
                                                 
@@ -72,6 +73,5 @@ void main(void){
     while (*current_character != 0x00) {
       // waiting in here until the string has completed sending
     }
-  while(1){}    
-
-}    
+  while(1){}  
+} 
