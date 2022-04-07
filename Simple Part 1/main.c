@@ -5,7 +5,7 @@
 // NOTE: these are stored as pointers because they 
 //       are const values so we can't store them directly
 //       in the struct
-typedef struct SerialPort { 
+typedef struct SerialPort {  
   byte *BaudHigh;
   byte *BaudLow;
   byte *ControlRegister1;
@@ -35,12 +35,17 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
 }   
 //struct string_Buufer  
 void OutputChar(char data, SerialPort *serial_port) {  
+  
+  while((*(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
+  } 
+   
   *(serial_port->DataRegister) = data;
 }
 
 interrupt 21 void GetOut(){ //data register has been transimited
+  
   char d = 'd'; 
- 
+  
   OutputChar(d,&SCI1);             
   //SerialOutputString(&string_buffer[0], &SCI1);   
 }      
@@ -49,15 +54,17 @@ interrupt 21 void GetOut(){ //data register has been transimited
 
 void main(void){  
  char s = 'S';
- //DisableInterrupts;   
+ //DisableInterrupts;    
  SerialInitialiseBasic(&SCI1);  
  
-while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
-  } 
+/*while((*((&SCI1)->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
+  }*/  
  OutputChar(s,&SCI1);     //char string_buffer[64];  // sprintf(&string_buffer[0],"HELLO WORLD!"); 
  
- //EnableInterrupts;        
+ //EnableInterrupts;          
  //GetOut();
- while(1){}  
+ for(;;) {
+    _FEED_COP(); /* feeds the dog */
+  } /* loop forever */   
 
 }    
