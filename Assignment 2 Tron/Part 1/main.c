@@ -50,7 +50,10 @@ void SerialOutputChar(char data, SerialPort *serial_port) {
 }
  
 void SerialInputChar(SerialPort *serial_port){
-  currentChar = *(serial_port->DataRegister);   
+  currentChar = *(serial_port->DataRegister);
+  //store current input in the arr
+  inputArray[arrCounter] = currentChar;
+  arrCounter++;   
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
@@ -60,9 +63,7 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
   }
   //input
   else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
-       SerialInputChar(&SCI1); 
-       inputArray[arrCounter] = currentChar;
-       arrCounter++;  
+       SerialInputChar(&SCI1);   
   } 
   else if (*current_character == 0x00){
     
@@ -91,4 +92,4 @@ void main(void){
   
   while(1){}    
 
-}  
+}   
