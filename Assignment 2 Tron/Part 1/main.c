@@ -11,17 +11,17 @@ typedef struct SerialPort {
   byte *ControlRegister1;
   byte *ControlRegister2;
   byte *DataRegister;
-  byte *StatusRegister;
+  byte *StatusRegister; 
 } SerialPort; 
 
 //output var
 char *string = "Interrupts Activate!!!\r\n";
-char *current_character = 0x00;
+char *currentOutputCounter = 0x00;
 
 //intput var
 char inputArray[64];
-char currentChar = ' ';   
-int arrCounter = 0x00;  
+char currentInputChar = ' ';   
+int arrInCounter = 0x00;  
  
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
@@ -50,22 +50,22 @@ void SerialOutputChar(char data, SerialPort *serial_port) {
 }
  
 void SerialInputChar(SerialPort *serial_port){
-  currentChar = *(serial_port->DataRegister);
+  currentInputChar = *(serial_port->DataRegister);
   //store current input in the arr
-  inputArray[arrCounter] = currentChar;
-  arrCounter++;   
+  inputArray[arrInCounter] = currentInputChar;
+  arrInCounter++;   
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
   //output
-  if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *current_character != 0x00) {
-    SerialOutputChar(*(current_character++), &SCI1);
+  if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *currentOutputCounter != 0x00) {
+    SerialOutputChar(*(currentOutputCounter++), &SCI1);
   }
   //input
   else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
        SerialInputChar(&SCI1);   
   } 
-  else if (*current_character == 0x00){
+  else if (*currentOutputCounter == 0x00){
     
     // string is finished, stop the transmit interrupt from firing
     *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
@@ -78,18 +78,18 @@ void main(void){
   EnableInterrupts
   
   //output  start                                            
-  current_character = &string[0];
+  currentOutputCounter = &string[0];
     
     // enable the transmit mask 
   *(SCI1.ControlRegister2) |= SCI1CR2_TCIE_MASK;
     
     // interrupts are enabled, only send the first char then the interrupts will send the rest one at a time
-  SerialOutputChar(*(current_character++), &SCI1);
+  SerialOutputChar(*(currentOutputCounter++), &SCI1);
     
-  while (*current_character != 0x00) {
+  while (*currentOutputCounter != 0x00) {
       // waiting in here until the string has completed sending
-  }
+  } 
   
   while(1){}    
 
-}   
+}  
