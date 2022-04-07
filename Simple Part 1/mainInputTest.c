@@ -17,7 +17,7 @@ typedef struct SerialPort {
 //intput var
 char inputArray[64];
 char currentChar = ' ';   
-int arrCounter = 0x00;  
+int arrCounter = 0;   
  
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
@@ -33,13 +33,17 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   //output set up
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
-}   
+} 
+
+void SerialInputChar(SerialPort *serial_port){
+  currentChar = *(serial_port->DataRegister);   
+}
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
   //input 
-  if (!(*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK)){ 
-       //SerialInputChar(&SCI1); 
-       currentChar = inputArray[arrCounter];
+  if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
+       SerialInputChar(&SCI1); 
+       inputArray[arrCounter] = currentChar;
        arrCounter++;  
   } 
 }         
@@ -53,7 +57,7 @@ void main(void){
   
   while(1){}    
 
-}       
+}         
 
 /*
 #define SCI1CR2_SBK_MASK                1U //0

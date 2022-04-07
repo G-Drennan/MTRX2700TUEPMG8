@@ -31,7 +31,6 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK; 
   *(serial_port->ControlRegister1) = 0x00;
 }   
-
         
 void SerialOutputChar(char data, SerialPort *serial_port) {  
 
