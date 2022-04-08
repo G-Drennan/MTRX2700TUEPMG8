@@ -40,12 +40,6 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
 //struct string_Buufer  
 void SerialOutputChar(char data, SerialPort *serial_port) {  
   
-  int wait_counter = 0;
-  while((*(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK) == 0){
-     if (wait_counter < 0xFE)
-       wait_counter++;
-  }
-  
   *(serial_port->DataRegister) = data; 
 }
  
@@ -88,7 +82,7 @@ void main(void){
     
   while (*currentOutputCounter != 0x00) {
       // waiting in here until the string has completed sending
-  } 
+  }  
   
   while(1){}    
 
