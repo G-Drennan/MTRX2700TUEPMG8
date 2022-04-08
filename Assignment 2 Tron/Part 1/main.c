@@ -38,8 +38,7 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   *(serial_port->ControlRegister1) = 0x00;
 }   
 //struct string_Buufer  
-void SerialOutputChar(char data, SerialPort *serial_port) {  
-  
+void SerialOutputChar(char data, SerialPort *serial_port) {   
   *(serial_port->DataRegister) = data; 
 }
  
