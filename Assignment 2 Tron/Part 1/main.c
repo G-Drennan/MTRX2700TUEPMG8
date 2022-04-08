@@ -2,9 +2,7 @@
 #include "derivative.h"      /* derivative-specific definitions */
 #include <stdio.h>   
 
-// NOTE: these are stored as pointers because they 
-//       are const values so we can't store them directly
-//       in the struct 
+//stuct to define the serial ports by
 typedef struct SerialPort { 
   byte *BaudHigh;
   byte *BaudLow;
@@ -24,7 +22,6 @@ char currentInputChar = ' ';
 int arrInCounter = 0x00;  
  
 // instantiate the serial port parameters
-//   note: the complexity is hidden in the c file
 SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
  
 // InitialiseSerial - Initialise the serial port SCI1
@@ -36,13 +33,15 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK|SCI1CR2_RIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
-}   
-//struct string_Buufer  
-void SerialOutputChar(char data, SerialPort *serial_port) {   
+}
+  
+void SerialOutputChar(char data, SerialPort *serial_port) {    
+  //place char inot the serial port
   *(serial_port->DataRegister) = data; 
 }
  
 void SerialInputChar(SerialPort *serial_port){
+  //retrive the inputted char from the serial port
   currentInputChar = *(serial_port->DataRegister);
   //store current input in the arr
   inputArray[arrInCounter] = currentInputChar;
@@ -50,19 +49,23 @@ void SerialInputChar(SerialPort *serial_port){
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
-  //output
+  //output interrupt
   if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *currentOutputCounter != 0x00) {
     SerialOutputChar(*(currentOutputCounter++), &SCI1);
   }
-  //input
+  //input interrupt
   else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
-       SerialInputChar(&SCI1);   
+       SerialInputChar(&SCI1);
+       //if a new line is created end the input interrupt. 
+       if(currentInputChar==13){
+         *(SCI1.ControlRegister2) &= ~SCI1CR2_RIE_MASK; 
+       }
   } 
   else if (*currentOutputCounter == 0x00){
     
-    // string is finished, stop the transmit interrupt from firing
+    // No more char, stop output interrupt
     *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
-  }
+  } 
 }         
 
 void main(void){  
@@ -70,18 +73,12 @@ void main(void){
 
   EnableInterrupts
   
-  //output  start                                            
+  //output  start
+  //chose a stirng to send                                            
   currentOutputCounter = &string[0];
     
-    // enable the transmit mask 
+  // enable the transmit mask for output 
   *(SCI1.ControlRegister2) |= SCI1CR2_TCIE_MASK;
-    
-    // interrupts are enabled, only send the first char then the interrupts will send the rest one at a time
-  SerialOutputChar(*(currentOutputCounter++), &SCI1);
-    
-  while (*currentOutputCounter != 0x00) {
-      // waiting in here until the string has completed sending
-  }  
   
   while(1){}    
 
