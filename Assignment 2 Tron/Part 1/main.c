@@ -63,27 +63,35 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
     // string is finished, stop the transmit interrupt from firing
     *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
   }
-}         
+}
+
+void outputSetUp(SerialPort *serial_port) {
+     //Replacing SCI1 with serial_port causes the program to not work 
+     // however the function has been set up with the serial port input for future uses and will need to be editied 
+      
+    //output  start, store string in the counter                                            
+    currentOutputCounter = &string[0];
+    // enable the transmit mask 
+  *(SCI1.ControlRegister2) |= SCI1CR2_TCIE_MASK; 
+    
+    // interrupts are enabled, only send the first char then the interrupts will send the rest one at a time
+  SerialOutputChar(*(currentOutputCounter++), &SCI1);  
+    
+  while (*currentOutputCounter != 0x00) { 
+      // waiting in here until the string has completed sending
+  }  
+}
 
 void main(void){  
  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
-  //assign a new stirng to string to be outputted to the serial port. 
-  string = "New String\r\n"; 
-  //output  start                                            
-  currentOutputCounter = &string[0];
-    
-    // enable the transmit mask 
-  *(SCI1.ControlRegister2) |= SCI1CR2_TCIE_MASK;
-    
-    // interrupts are enabled, only send the first char then the interrupts will send the rest one at a time
-  SerialOutputChar(*(currentOutputCounter++), &SCI1);
-    
-  while (*currentOutputCounter != 0x00) {
-      // waiting in here until the string has completed sending
-  }  
   
-  while(1){}    
+  //assign a new stirng to string to be outputted to the serial port. 
+  string = "New String is longer than the original I'm sure of it\r\n";  
+  //Run the first output code to start output. 
+  outputSetUp(&SCI1);
+    
+  while(1){}     
 
-}    
+}  
