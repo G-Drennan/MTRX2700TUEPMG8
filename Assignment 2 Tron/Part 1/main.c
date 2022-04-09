@@ -11,8 +11,8 @@ typedef struct SerialPort {
   byte *ControlRegister1;
   byte *ControlRegister2;
   byte *DataRegister;
-  byte *StatusRegister; 
-} SerialPort; 
+  byte *StatusRegister;  
+} SerialPort;  
 
 //output var
 char *string = "Interrupts Activate!!!\r\n";
@@ -56,7 +56,11 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
   }
   //input
   else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
-       SerialInputChar(&SCI1);   
+       SerialInputChar(&SCI1);
+       //if a new line is created end the input interrupt. 
+       if(currentInputChar==13){
+         *(SCI1.ControlRegister2) &= ~SCI1CR2_RIE_MASK; 
+       }    
   } 
   else if (*currentOutputCounter == 0x00){
     
