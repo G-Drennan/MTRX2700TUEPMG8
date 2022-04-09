@@ -1,5 +1,6 @@
 #include <hidef.h>      /* common defines and macros */
 #include "derivative.h"      /* derivative-specific definitions */
+#include <ctype.h>
   
 
 int period;
@@ -10,32 +11,36 @@ __interrupt void UnimplementedISR(void);
 void play_note(int freq,int duration);
 void delay_ms(unsigned int k);
 
-int find_freq(int i, char* Notes);
-int find_duration(int i, char* Notes);
+int find_freq(char note);
+int find_duration(char note);
 
 //----------------------------------------------Main---------------------------------------------//
 
+
+// 8 bit data structure; _ _  _ _  _ _ _ _ 
+//                       Oc   Du    Note(12 notes + a rest)   
                   
 void main(void){
 	              //  A     b     c      D    E     F     G     R     //Cap = 2 sec, Lower = 1 sec
-	char Notes[8] = {0x41, 0x62, 0x63, 0x44, 0x45, 0x46, 0x47, 0x52}; // Temp input from terminal 
+	char Notes[8] = {(char)16, (char)33, (char)18, (char)35, (char)20, (char)37, (char)22, (char)16}; // Temp input from terminal 
   int i;
   
   // determine how long the string will play for
   int song_length = 0;
   for (i = 0; i<8; i++){
-    
-    song_length = song_length + find_duration(i, Notes);         // sum the duration of each note 
+    char current_note = Notes[i];
+    song_length = song_length + find_duration(current_note);         // sum the duration of each note 
                                                                  // to give the length of the song 
   }
                                                                  //output the final result to the termninal ***** 
  
   // play each note
   for (i = 0; i<8; i++){
+    char current_note = Notes[i];
     
     // determine the frequency and duration of each note
-    int freq = find_freq(i, Notes);              // if the inputed charecter is undefined the freq = 20
-    int duration = find_duration(i, Notes);         // determine the input 
+    int freq = find_freq(current_note);              // if the inputed charecter is undefined the freq = 20
+    int duration = find_duration(current_note);         // determine the input 
   
     play_note(freq, duration);                       // the 
   }
@@ -48,44 +53,30 @@ void main(void){
 
 //-----------------------------------------Sub-Functions-----------------------------------------//
 
-int find_freq(int i, char* Notes){
+int find_freq(char note){
   
-  char current_note = Notes[i];
-  volatile int index = 0;
+  unsigned char mask = 0x0F; // Concider these bit 00001111
   
-  char valid_input[16] = {0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x52,      // define all valid 
-                          0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x72};     // char inputs
-  int corresponding_freq[16]= {3411, 3039, 5737, 5111, 4553, 4298, 3829,  0,   // define their
+  unsigned int frequency_index = (mask & note); // only concider the last 4 bits, giving values from 0-15 
+
+  
+  int corresponding_freq[16]= {3411, 3039, 5737, 5111, 4553, 4298, 3829,  0,   // ** FIX ** currently A - G
                                3411, 3039, 5737, 5111, 4553, 4298, 3829,  0};  // corresponding freq
-  
-  // loop through each valid input to determine the corresponding frequency 
-  int j=0; 
-  for(j=0 ; j < 16 ; j++){
-    if(valid_input[j] == current_note){
-      index = j;                                                      // record the index
-    }
-  }
-  
-  return corresponding_freq[index];                                   // return the found frequency 
+
+  return corresponding_freq[frequency_index];
 }
 
-int find_duration(int i, char* Notes){
-  char current_note = Notes[i];
-  volatile int index = 0;
+int find_duration(char note){
+  int index = 0;
   
-  char valid_input[16] = {0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x52,
-                          0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x72}; 
-  int corresponding_duration[16]= {2000, 2000, 2000, 2000, 2000, 2000, 2000,  2000,
-                                   1000, 1000, 1000, 1000, 1000, 1000, 1000,  1000};
+  unsigned char mask = 0x30; // Concider these bit 00110000
   
-  int j=0; 
-  for(j=0 ; j < 16 ; j++){
-    if(valid_input[j] == current_note){
-      index = j; 
-    }
-  }
+  unsigned int duration_index = (mask & note) >> (4); // shift over 4 places so we get 0-3
   
-  return corresponding_duration[index];
+  int corresponding_duration[4]= {500, 1000, 4000, 4000}; // defined four durations, eight, quater, half, full
+  
+
+  return corresponding_duration[duration_index];
 }
 
 void play_note(int freq,int duration){
