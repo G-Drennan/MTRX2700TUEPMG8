@@ -59,12 +59,14 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
        SerialInputChar(&SCI1);
        //if a new line is created end the input interrupt. 
        if(currentInputChar==13){
+       //turn interrupt off for input
          *(SCI1.ControlRegister2) &= ~SCI1CR2_RIE_MASK; 
        }    
   } 
   else if (*currentOutputCounter == 0x00){
     
     // string is finished, stop the transmit interrupt from firing
+    //turn interrupt off for output 
     *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
   }
 }
@@ -98,4 +100,4 @@ void main(void){
     
   while(1){}     
 
-}  
+}    
