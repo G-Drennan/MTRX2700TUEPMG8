@@ -2,9 +2,7 @@
 #include "derivative.h"      /* derivative-specific definitions */
 #include <stdio.h>   
 
-// NOTE: these are stored as pointers because they 
-//       are const values so we can't store them directly
-//       in the struct 
+// Struct for serial port variables, set as pointers as they can't be stored in teh struct.
 typedef struct SerialPort { 
   byte *BaudHigh;
   byte *BaudLow;
@@ -23,12 +21,10 @@ char inputArray[64];
 char currentInputChar = ' ';   
 int arrInCounter = 0x00;  
  
-// instantiate the serial port parameters
-//   note: the complexity is hidden in the c file
+// Serial port parameters 
 SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
  
-// InitialiseSerial - Initialise the serial port SCI1
-// Input: baudRate is tha baud rate in bits/sec
+// InitialiseSerial - Initialise the serial port
 void SerialInitialiseBasic(SerialPort *serial_port) {
   //baud rate is BAUD_9600
   *(serial_port->BaudHigh)=0;
@@ -37,11 +33,13 @@ void SerialInitialiseBasic(SerialPort *serial_port) {
   *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK|SCI1CR2_RIE_MASK;     
   *(serial_port->ControlRegister1) = 0x00;
 }   
-//struct string_Buufer  
+
+//output char data to the serial_port
 void SerialOutputChar(char data, SerialPort *serial_port) {   
   *(serial_port->DataRegister) = data; 
 }
- 
+
+//Take input from serial_port and store in inputArray 
 void SerialInputChar(SerialPort *serial_port){
   currentInputChar = *(serial_port->DataRegister);
   //store current input in the arr
@@ -54,6 +52,7 @@ void SerialInputChar(SerialPort *serial_port){
   }    
 }
 
+//End the output to serial_port 
 void endoutput(SerialPort *serial_port){
 
    *(serial_port->ControlRegister2) &= ~SCI1CR2_TCIE_MASK; 
@@ -82,7 +81,8 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
        SerialInputChar(&SCI1);
        
            
-  } 
+  }
+  //end output
   else if (*currentOutputCounter == 0x00){
      // string is finished, stop the transmit interrupt from firing
     //turn interrupt off for output
@@ -106,7 +106,8 @@ void outputSetUp(SerialPort *serial_port) {
 }
 
 void main(void){  
- SerialInitialiseBasic(&SCI1);  
+  //Initialies the desired serial port 
+  SerialInitialiseBasic(&SCI1);  
 
   EnableInterrupts
   
