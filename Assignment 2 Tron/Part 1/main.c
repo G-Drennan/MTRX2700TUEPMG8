@@ -13,13 +13,13 @@ typedef struct SerialPort {
 } SerialPort;  
 
 //output var
-char *string = "Interrupts Activate!!!\r\n";
-char *currentOutputCounter = 0x00;
+char *string = "Interrupts Activate!!!\r\n"; //string is used for output
+char *currentOutputCounter = 0x00; //pointer to string
 
 //intput var
-char inputArray[64];
-char currentInputChar = ' ';   
-int arrInCounter = 0x00;  
+char inputArray[64]; //where inputts are held
+char currentInputChar = ' '; //holds the current inputted charater  
+int arrInCounter = 0x00;  //used to move along the input arr as new input is placed in the serial port.
  
 // Serial port parameters 
 SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
