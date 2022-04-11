@@ -60,12 +60,13 @@ void endoutput(SerialPort *serial_port){
 
 }
 
-//  outputs 1 if the form is output
+//  outputs 1 if the form of serial port is output
 int IsOutTrue(SerialPort *serial_port){
    int boo = *(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK;
    return boo;
 }
 
+//  outputs 1 if the form of serial port is input
 int IsInTrue(SerialPort *serial_port){
    int boo = *(serial_port->StatusRegister) & SCI1SR1_RDRF_MASK;
    return boo;
