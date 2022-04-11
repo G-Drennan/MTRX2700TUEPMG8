@@ -9,11 +9,11 @@ typedef struct SerialPort {
   byte *ControlRegister1;
   byte *ControlRegister2;
   byte *DataRegister;
-  byte *StatusRegister;  
+  byte *StatusRegister;   
 } SerialPort;  
 
-//output var
-char *string = "Interrupts Activate!!!\r\n"; //string is used for output
+//output var 
+char *string = "1234567890123456789012345678901234567890123456789012345678901234"; //string is used for output
 char *currentOutputCounter = 0x00; //pointer to string
 
 //intput var
@@ -112,7 +112,7 @@ void main(void){
   EnableInterrupts
   
   //assign a new stirng to string to be outputted to the serial port. 
-  string = "New String is longer than the original I'm sure of it\r\n";  
+  string = "New String is shorter than the original I'm sure of it\r\n";  
   //Run the first output code to start output. 
   outputSetUp(&SCI1);
     
