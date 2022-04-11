@@ -4,7 +4,7 @@ Giaan Drennan, Minghan Li, Antonio Matruglio, Lachlan Mizon.
 
 ## Part 1
 
-This program puts input and output with interrupts to the desired serial port written the the various functions (in this case SCI1).
+This program puts input and output with interrupts to the desired serial port written the the various functions (in this case SCI1). These interrupts only take a few milliseconds.  
 
 **Output**
 
