@@ -1,0 +1,196 @@
+#include <hidef.h>      /* common defines and macros */
+#include "derivative.h"      /* derivative-specific definitions */
+#include <stdio.h>   
+#include <string.h>
+
+
+//**********************************************//
+//***Output register setup***//
+//Structure for addressing serial port registers
+typedef struct SerialPort { 
+  byte *BaudHigh;
+  byte *BaudLow;
+  byte *ControlRegister1;
+  byte *ControlRegister2;
+  byte *DataRegister;
+  byte *StatusRegister;  
+} SerialPort;
+
+//Assign SCI1 registers to struct  
+SerialPort SCI1 = {&SCI1BDH, &SCI1BDL, &SCI1CR1, &SCI1CR2, &SCI1DRL, &SCI1SR1};
+
+//Set relevant values in SCI1 registers, clear SCI1CR1
+void SerialInitialiseBasic(SerialPort *serial_port) {
+
+  //baud rate is BAUD_9600
+  *(serial_port->BaudHigh)=0;
+  *(serial_port->BaudLow)=156;   
+  
+  *(serial_port->ControlRegister2) = SCI1CR2_RE_MASK|SCI1CR2_TE_MASK|SCI1CR2_TCIE_MASK|SCI1CR2_RIE_MASK;     
+  *(serial_port->ControlRegister1) = 0x00;
+}
+
+
+//**********************************************//
+//***Incoming and outgoing string array setup***//
+//Output message string and array pointer initialisation
+char outputString[] = "This is an output command message\r\n";
+char *currentOutputLocation; //Stores character for output string
+int writingFlag = 0; //Variable for if the program is currently outputting a string
+char newLine = '\n'; //Newline variable 
+char returnCarriage = '\r'; //Return carriage or enter
+
+//Array to store incoming commands and pointer initialisation
+char inputArray[64];  
+int arrInLocation; 
+
+
+
+
+//**********************************************//
+//Incoming command definitions//
+char outputCommand[] = "message";
+char LEDCommand[] = "LEDtoggle";
+char musicCommand[] = "music";
+char outputMessage1[] = "This command outputs a message\r\n";
+char outputMessage2[] = "Or potentially outputs this message\r\n";
+char errorMessage[] = "Invalid command\r\n";
+char errorMessage2[] = "Invalid command parameters\r\n";
+
+//**********************************************//
+//***Receiving and sending char functions***///
+//Outputting string char function
+void SerialOutputChar(char data, SerialPort *serial_port) {  
+ 
+  *(serial_port->DataRegister) = data; 
+  if (data == newLine){
+    writingFlag = 0;
+    arrInLocation = 0;
+  }
+}
+
+//Receiving char from serial port function 
+void SerialInputChar(SerialPort *serial_port){
+
+  //store current input in the arr
+  inputArray[arrInLocation] = *(serial_port->DataRegister);   
+}
+
+
+
+//**********************************************//
+//Compare input to command function
+void commandFunction(void){
+  
+  
+  //Compare the input string to the various command strings
+  if(strncmp(inputArray, outputCommand, 7)==0){
+  
+    //Output command
+    writingFlag = 1; //Turns on writing flag to ignore reading interrupts
+    
+    if(inputArray[8] == '1'){
+    
+      currentOutputLocation = &outputMessage1[0]; //Set the string location to the outputMessage
+      SerialOutputChar(*(currentOutputLocation), &SCI1); //Force the first output character, interrupts should do the rest
+      currentOutputLocation++;
+    
+    }else if(inputArray[8] == '2'){
+    
+      currentOutputLocation = &outputMessage2[0]; //Set the string location to the outputMessage
+      SerialOutputChar(*(currentOutputLocation), &SCI1); //Force the first output character, interrupts should do the rest
+      currentOutputLocation++;
+    
+    }else{
+     
+      currentOutputLocation = &errorMessage2[0]; //Set the string location to the errorMessage
+      SerialOutputChar(*(currentOutputLocation), &SCI1); //Force the first output character, interrupts should do the rest
+      currentOutputLocation++;
+    }
+    
+    
+  }else if(strncmp(inputArray, LEDCommand, 9)==0){
+  
+    //LED command
+    if(inputArray[10] == '1'){
+    
+      PORTB = 1;//Turn LED on
+    }else if(inputArray[10] == '0'){
+      PORTB = 0;//Turn LED off
+    }else{
+    
+      writingFlag = 1; //Turns on writing flag to ignore reading interrupts
+      currentOutputLocation = &errorMessage2[0]; //Set the string location to the errorMessage
+      SerialOutputChar(*(currentOutputLocation), &SCI1); //Force the first output character, interrupts should do the rest
+      currentOutputLocation++;
+    }
+    
+     
+  }else if(strncmp(inputArray, musicCommand, 5)==0){
+    
+  }else{
+  
+    //Error command
+    writingFlag = 1; //Turns on writing flag to ignore reading interrupts
+    currentOutputLocation = &errorMessage[0]; //Set the string location to the errorMessage
+    SerialOutputChar(*(currentOutputLocation), &SCI1); //Force the first output character, interrupts should do the rest
+    currentOutputLocation++;  
+  }
+} 
+
+
+
+//**********************************************//
+//***Serial port interrupt function***//
+interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
+  
+  //output
+  if ((*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK) && (writingFlag == 1)) {
+  
+  //Output the current character of the string
+    SerialOutputChar(*(currentOutputLocation), &SCI1);
+    
+    //Increment pointer
+    currentOutputLocation++;  
+  
+  }
+  
+  //input
+  else if((*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK) && (writingFlag==0)){ 
+  
+       //Store the current input character to the array
+       SerialInputChar(&SCI1);
+       
+       //If the most recently read function is a newline character, read the command
+       if(inputArray[arrInLocation] == returnCarriage){
+       
+         commandFunction();
+         arrInLocation = 0;
+       }else{
+         //Increment array location
+         arrInLocation++;
+       }
+       
+       
+       
+  }
+}
+
+
+
+
+
+//**********************************************//
+//Main
+void main(void){
+
+  SerialInitialiseBasic(&SCI1); //Initialise the SCI1 port
+  DDRB = 0xFF; //Set the direction to output
+  PORTB = 0x00; //LEDs are off to begin with
+	EnableInterrupts //Turn on interrupts
+
+
+  for(;;) {
+    _FEED_COP();
+  } 
+}
