@@ -46,7 +46,18 @@ void SerialInputChar(SerialPort *serial_port){
   currentInputChar = *(serial_port->DataRegister);
   //store current input in the arr
   inputArray[arrInCounter] = currentInputChar;
-  arrInCounter++;   
+  arrInCounter++;
+  //if a new line is created end the input interrupt.  
+  if(currentInputChar==13){
+       //turn interrupt off for input
+         *(serial_port->ControlRegister2) &= ~SCI1CR2_RIE_MASK; 
+  }    
+}
+
+void endoutput(SerialPort *serial_port){
+
+   *(serial_port->ControlRegister2) &= ~SCI1CR2_TCIE_MASK; 
+
 }
 
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
@@ -57,17 +68,13 @@ interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
   //input
   else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
        SerialInputChar(&SCI1);
-       //if a new line is created end the input interrupt. 
-       if(currentInputChar==13){
-       //turn interrupt off for input
-         *(SCI1.ControlRegister2) &= ~SCI1CR2_RIE_MASK; 
-       }    
+       
+           
   } 
   else if (*currentOutputCounter == 0x00){
-    
-    // string is finished, stop the transmit interrupt from firing
-    //turn interrupt off for output 
-    *(SCI1.ControlRegister2) &= ~SCI1CR2_TCIE_MASK;
+     // string is finished, stop the transmit interrupt from firing
+    //turn interrupt off for output
+     endoutput(&SCI1); 
   }
 }
 
