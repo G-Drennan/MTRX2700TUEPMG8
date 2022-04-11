@@ -60,13 +60,24 @@ void endoutput(SerialPort *serial_port){
 
 }
 
+//  outputs 1 if the form is output
+int IsOutTrue(SerialPort *serial_port){
+   int boo = *(serial_port->StatusRegister) & SCI1SR1_TDRE_MASK;
+   return boo;
+}
+
+int IsInTrue(SerialPort *serial_port){
+   int boo = *(serial_port->StatusRegister) & SCI1SR1_RDRF_MASK;
+   return boo;
+}
+
 interrupt VectorNumber_Vsci1 void SerialInterruptHandler(){
-  //output
-  if (*(SCI1.StatusRegister) & SCI1SR1_TDRE_MASK && *currentOutputCounter != 0x00) {
+  //output 
+  if (IsOutTrue(&SCI1) && *currentOutputCounter != 0x00) {
     SerialOutputChar(*(currentOutputCounter++), &SCI1);
   }
   //input
-  else if(*(SCI1.StatusRegister) & SCI1SR1_RDRF_MASK){ 
+  else if(IsInTrue(&SCI1)){ 
        SerialInputChar(&SCI1);
        
            
@@ -105,4 +116,4 @@ void main(void){
     
   while(1){}     
 
-}  
+}   
