@@ -48,8 +48,10 @@ The parser could fail if there were input commands that were longer than 64 char
 
 ## Part 3 
 The program converts a character into a note. Using the method developed in exercise 1, a string of char is passed through the terminal to the function. The produced note is then determined based on the binary input of that character. This is done with the below data structure. 
+
                                                                             _ _  _ _  _ _ _ _ 
                                                                              Oc   Du   Notes 
+                                                                             
 Using this logic two functions were developed to determine the corresponding frequency and the duration of the note called find_freq, find_duration. Find_duration determines if the corresponding bits are a 0-3, dependent on this the duration will be a full, half, quarter, or eight note. The find_frequency function determines the inputted note value to be from 0-15, representing 12 notes and 4 rests. The 12 notes are initialised to be in the third octave. Then the inputted octave is considered whose value can range from 0-3. The initial frequency is then multiplied two to the power of the octave value. If the note is selected to be a rest i.e., a 12-15, the function will return a zero. The function then returns the results as an integer. Using these two integers a play note function is called. The function checks if the input was a rest note, turning the speaker off if so. Otherwise the function plays the note for the specified duration. 
 
 **Testing**
