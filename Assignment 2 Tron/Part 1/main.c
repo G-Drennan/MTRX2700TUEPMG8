@@ -13,8 +13,8 @@ typedef struct SerialPort {
 } SerialPort;  
 
 //output var 
-char *string = "1234567890123456789012345678901234567890123456789012345678901234"; //string is used for output
-char *currentOutputCounter = 0x00; //pointer to string
+char *string = "1234567890123456789012345678901234567890123456789012345678901234"; //string is used for output and is about 64 char long
+char *currentOutputCounter = 0x00; //pointer to string 
 
 //intput var
 char inputArray[64]; //where inputts are held
@@ -118,4 +118,4 @@ void main(void){
     
   while(1){}     
 
-}   
+}  
