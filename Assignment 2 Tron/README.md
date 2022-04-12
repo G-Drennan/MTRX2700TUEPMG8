@@ -20,15 +20,15 @@ The output was tested by stepping thru the code and ensureing that the ouput mat
 The input function takes a global variable inputArray and then assigns charaters in the serial port to the inputArray. When the enter charater (13) is entered the input is stopped.
 The inputArray is initialy stored as an array of size 64.
 
+**TEST**
+
+The input was tested by entering in a string in the terrminal and ensuring that the charaters appeared in the inputArray. 
+
 **Discussion**
 
 The data was buffered by making 64 charater size strings when initializing them.
 
 These interrupts only take a few milliseconds.  
-
-**TEST**
-
-The input was tested by entering in a string in the terrminal and ensuring that the charaters appeared in the inputArray. 
 
 ## Part 2
 
