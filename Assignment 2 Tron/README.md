@@ -22,7 +22,7 @@ The inputArray is initialy stored as an array of size 64.
 
 **TEST**
 
-The input was tested by entering in a string in the terrminal and ensuring that the charaters appeared in the inputArray.  
+The input was tested by entering in a string in the terrminal and ensuring that the charaters appeared in the inputArray. 
 
 ## Part 2
 
