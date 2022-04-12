@@ -82,6 +82,7 @@ int main()
 }
 
 **Discussion**
+
 If a new tune is requested before the previous one finishes the program will que the song and it will be played once the current song is completed. 
 
 As the input is read from terminal and due to the consideration of each of the 8 bits to produce a note there are no invalid inputs. In fact, the number of inputs is greater than the number of inputs possible on the keyboard. If there was a parsing error from the tune string the outputted song would have undefined behaviour.
